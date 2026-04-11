@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zhuyin Laptop Trainer</title>
+    <title>Taiwan Standard Zhuyin Keyboard</title>
     <style>
         :root {
-            --kb-base: #2d3436;
-            --key-bg: #fdfdfd;
-            --key-text: #2d3436;
+            --chassis: #2d3436;
+            --key-bg: #ffffff;
             --initial: #ffeaa7;
             --medial: #55efc4;
             --final: #81ecec;
@@ -16,239 +15,204 @@
         }
 
         body {
-            background-color: #dfe6e9;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #ecf0f1;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-        }
-
-        /* Screen Area */
-        .laptop-screen {
-            background: white;
-            width: 100%;
-            max-width: 850px;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            margin-bottom: 40px;
-            border: 10px solid #2d3436;
-        }
-
-        .target-hanzi { font-size: 5rem; margin: 10px 0; color: #2d3436; }
-        .display-text { font-size: 2.5rem; color: #0984e3; min-height: 60px; letter-spacing: 8px; }
-
-        /* Keyboard Chassis */
-        .keyboard-chassis {
-            background: var(--kb-base);
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 900px;
         }
 
-        .kb-row {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 8px;
-            gap: 6px;
+        .screen {
+            background: #fff;
+            width: 800px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 8px solid var(--chassis);
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        /* Key Styling */
+        .target-hanzi { font-size: 4rem; margin: 10px 0; }
+        .input-display { font-size: 2.5rem; color: #0984e3; height: 50px; letter-spacing: 5px; border-bottom: 2px solid #ddd; display: inline-block; min-width: 150px;}
+
+        .keyboard {
+            background: var(--chassis);
+            padding: 15px;
+            border-radius: 12px;
+            width: 850px;
+            user-select: none;
+        }
+
+        .row { display: flex; justify-content: flex-start; margin-bottom: 6px; gap: 5px; padding-left: 10px; }
+        
+        /* Offset untuk baris agar menyerupai keyboard asli */
+        .row-2 { padding-left: 35px; }
+        .row-3 { padding-left: 50px; }
+        .row-4 { padding-left: 70px; }
+
         .key {
+            width: 54px; height: 54px;
             background: var(--key-bg);
-            color: var(--key-text);
-            border: none;
-            border-radius: 6px;
-            width: 60px;
-            height: 60px;
-            font-size: 1.2rem;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             font-weight: bold;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.1s;
-            box-shadow: 0 4px 0 #b2bec3;
+            border: none;
+            box-shadow: 0 4px 0 #636e72;
+            position: relative;
         }
 
-        .key:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #b2bec3;
-        }
+        .key:active { transform: translateY(3px); box-shadow: 0 1px 0 #636e72; }
+        
+        .key .eng { font-size: 0.65rem; color: #b2bec3; position: absolute; top: 5px; left: 5px; }
+        .key .zhuyin { font-size: 1.3rem; margin-top: 5px; }
 
-        .key span.small { font-size: 0.7rem; color: #636e72; margin-bottom: 2px; }
-
-        /* Color Coding */
+        /* Warna kategori */
         .initial { background: var(--initial); }
         .medial { background: var(--medial); }
         .final { background: var(--final); }
         .tone { background: var(--tone); }
+
+        .key-wide { width: 90px; background: #95a5a6; color: white; }
+        .key-space { width: 350px; background: white; }
         
-        /* Functional Keys */
-        .key-backspace { width: 100px; background: #e17055; color: white; }
-        .key-space { width: 350px; }
-        .key-enter { width: 90px; background: #00b894; color: white; }
-
-        /* States */
-        .disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
-        .highlight { outline: 3px solid #fdcb6e; transform: scale(1.02); }
-
-        #feedback { font-weight: bold; margin-top: 10px; height: 20px; }
+        .disabled { opacity: 0.3; pointer-events: none; }
+        .highlight { outline: 3px solid #f1c40f; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div class="laptop-screen">
-        <div id="feedback"></div>
-        <h1 class="target-hanzi" id="target-hanzi">我</h1>
-        <div class="display-text" id="display-input">_</div>
-        <div style="color: #636e72">Skor: <span id="score">0</span></div>
+    <div class="screen">
+        <div id="msg" style="color: #e74c3c; height: 20px;"></div>
+        <div class="target-hanzi" id="target">馬</div>
+        <div class="input-display" id="display">_</div>
+        <p>Skor: <span id="score">0</span></p>
     </div>
 
-    <div class="keyboard-chassis" id="keyboard">
-        <div class="kb-row">
-            <button class="key initial" onclick="press('ㄅ')"><span class="small">1</span>ㄅ</button>
-            <button class="key initial" onclick="press('ㄆ')"><span class="small">2</span>ㄆ</button>
-            <button class="key initial" onclick="press('ㄇ')"><span class="small">3</span>ㄇ</button>
-            <button class="key initial" onclick="press('ㄈ')"><span class="small">4</span>ㄈ</button>
-            <button class="key initial" onclick="press('ㄉ')"><span class="small">5</span>ㄉ</button>
-            <button class="key initial" onclick="press('ㄊ')"><span class="small">6</span>ㄊ</button>
-            <button class="key initial" onclick="press('ㄋ')"><span class="small">7</span>ㄋ</button>
-            <button class="key initial" onclick="press('ㄌ')"><span class="small">8</span>ㄌ</button>
-            <button class="key initial" onclick="press('ㄍ')"><span class="small">9</span>ㄍ</button>
-            <button class="key initial" onclick="press('ㄎ')"><span class="small">0</span>ㄎ</button>
-            <button class="key key-backspace" onclick="handleDelete()">Delete</button>
+    <div class="keyboard">
+        <div class="row">
+            <button class="key initial" onclick="press('ㄅ')"><span class="eng">1</span><span class="zhuyin">ㄅ</span></button>
+            <button class="key initial" onclick="press('ㄆ')"><span class="eng">2</span><span class="zhuyin">ㄆ</span></button>
+            <button class="key initial" onclick="press('ㄇ')"><span class="eng">3</span><span class="zhuyin">ㄇ</span></button>
+            <button class="key initial" onclick="press('ㄈ')"><span class="eng">4</span><span class="zhuyin">ㄈ</span></button>
+            <button class="key initial" onclick="press('ㄉ')"><span class="eng">5</span><span class="zhuyin">ㄉ</span></button>
+            <button class="key initial" onclick="press('ㄊ')"><span class="eng">6</span><span class="zhuyin">ㄊ</span></button>
+            <button class="key initial" onclick="press('ㄋ')"><span class="eng">7</span><span class="zhuyin">ㄋ</span></button>
+            <button class="key initial" onclick="press('ㄌ')"><span class="eng">8</span><span class="zhuyin">ㄌ</span></button>
+            <button class="key initial" onclick="press('ㄍ')"><span class="eng">9</span><span class="zhuyin">ㄍ</span></button>
+            <button class="key initial" onclick="press('ㄎ')"><span class="eng">0</span><span class="zhuyin">ㄎ</span></button>
+            <button class="key key-wide" onclick="resetInput()">Hapus</button>
         </div>
 
-        <div class="kb-row">
-            <button class="key initial" onclick="press('ㄏ')"><span class="small">Q</span>ㄏ</button>
-            <button class="key initial" onclick="press('ㄐ')"><span class="small">W</span>ㄐ</button>
-            <button class="key initial" onclick="press('ㄑ')"><span class="small">E</span>ㄑ</button>
-            <button class="key initial" onclick="press('ㄒ')"><span class="small">R</span>ㄒ</button>
-            <button class="key initial" onclick="press('ㄓ')"><span class="small">T</span>ㄓ</button>
-            <button class="key initial" onclick="press('ㄔ')"><span class="small">Y</span>ㄔ</button>
-            <button class="key initial" onclick="press('ㄕ')"><span class="small">U</span>ㄕ</button>
-            <button class="key initial" onclick="press('ㄖ')"><span class="small">I</span>ㄖ</button>
-            <button class="key initial" onclick="press('ㄗ')"><span class="small">O</span>ㄗ</button>
-            <button class="key initial" onclick="press('ㄘ')"><span class="small">P</span>ㄘ</button>
+        <div class="row row-2">
+            <button class="key initial" onclick="press('ㄏ')"><span class="eng">Q</span><span class="zhuyin">ㄏ</span></button>
+            <button class="key initial" onclick="press('ㄐ')"><span class="eng">W</span><span class="zhuyin">ㄐ</span></button>
+            <button class="key initial" onclick="press('ㄑ')"><span class="eng">E</span><span class="zhuyin">ㄑ</span></button>
+            <button class="key initial" onclick="press('ㄒ')"><span class="eng">R</span><span class="zhuyin">ㄒ</span></button>
+            <button class="key initial" onclick="press('ㄓ')"><span class="eng">T</span><span class="zhuyin">ㄓ</span></button>
+            <button class="key initial" onclick="press('ㄔ')"><span class="eng">Y</span><span class="zhuyin">ㄔ</span></button>
+            <button class="key initial" onclick="press('ㄕ')"><span class="eng">U</span><span class="zhuyin">ㄕ</span></button>
+            <button class="key initial" onclick="press('ㄖ')"><span class="eng">I</span><span class="zhuyin">ㄖ</span></button>
+            <button class="key initial" onclick="press('ㄗ')"><span class="eng">O</span><span class="zhuyin">ㄗ</span></button>
+            <button class="key initial" onclick="press('ㄘ')"><span class="eng">P</span><span class="zhuyin">ㄘ</span></button>
         </div>
 
-        <div class="kb-row">
-            <button class="key initial" onclick="press('ㄙ')"><span class="small">A</span>ㄙ</button>
-            <button class="key medial" onclick="press('ㄧ')"><span class="small">S</span>ㄧ</button>
-            <button class="key medial" onclick="press('ㄨ')"><span class="small">D</span>ㄨ</button>
-            <button class="key medial" onclick="press('ㄩ')"><span class="small">F</span>ㄩ</button>
-            <button class="key final" onclick="press('ㄚ')"><span class="small">G</span>ㄚ</button>
-            <button class="key final" onclick="press('ㄛ')"><span class="small">H</span>ㄛ</button>
-            <button class="key final" onclick="press('ㄜ')"><span class="small">J</span>ㄜ</button>
-            <button class="key final" onclick="press('ㄝ')"><span class="small">K</span>ㄝ</button>
-            <button class="key final" onclick="press('ㄞ')"><span class="small">L</span>ㄞ</button>
-            <button class="key tone" onclick="press('ˋ')"><span class="small">;</span>ˋ</button>
+        <div class="row row-3">
+            <button class="key initial" onclick="press('ㄙ')"><span class="eng">A</span><span class="zhuyin">ㄙ</span></button>
+            <button class="key medial" onclick="press('ㄧ')"><span class="eng">S</span><span class="zhuyin">ㄧ</span></button>
+            <button class="key medial" onclick="press('ㄨ')"><span class="eng">D</span><span class="zhuyin">ㄨ</span></button>
+            <button class="key medial" onclick="press('ㄩ')"><span class="eng">F</span><span class="zhuyin">ㄩ</span></button>
+            <button class="key final" onclick="press('ㄚ')"><span class="eng">G</span><span class="zhuyin">ㄚ</span></button>
+            <button class="key final" onclick="press('ㄛ')"><span class="eng">H</span><span class="zhuyin">ㄛ</span></button>
+            <button class="key final" onclick="press('ㄜ')"><span class="eng">J</span><span class="zhuyin">ㄜ</span></button>
+            <button class="key final" onclick="press('ㄝ')"><span class="eng">K</span><span class="zhuyin">ㄝ</span></button>
+            <button class="key final" onclick="press('ㄞ')"><span class="eng">L</span><span class="zhuyin">ㄞ</span></button>
+            <button class="key tone" onclick="press('ˋ')"><span class="eng">;</span><span class="zhuyin">ˋ</span></button>
         </div>
 
-        <div class="kb-row">
-            <button class="key final" onclick="press('ㄟ')"><span class="small">Z</span>ㄟ</button>
-            <button class="key final" onclick="press('ㄠ')"><span class="small">X</span>ㄠ</button>
-            <button class="key final" onclick="press('ㄡ')"><span class="small">C</span>ㄡ</button>
-            <button class="key final" onclick="press('ㄢ')"><span class="small">V</span>ㄢ</button>
-            <button class="key final" onclick="press('ㄣ')"><span class="small">B</span>ㄣ</button>
-            <button class="key final" onclick="press('ㄤ')"><span class="small">N</span>ㄤ</button>
-            <button class="key final" onclick="press('ㄥ')"><span class="small">M</span>ㄥ</button>
-            <button class="key final" onclick="press('ㄦ')"><span class="small">,</span>ㄦ</button>
-            <button class="key tone" onclick="press('ˊ')"><span class="small">.</span>ˊ</button>
-            <button class="key tone" onclick="press('ˇ')"><span class="small">/</span>ˇ</button>
+        <div class="row row-4">
+            <button class="key final" onclick="press('ㄟ')"><span class="eng">Z</span><span class="zhuyin">ㄟ</span></button>
+            <button class="key final" onclick="press('ㄠ')"><span class="eng">X</span><span class="zhuyin">ㄠ</span></button>
+            <button class="key final" onclick="press('ㄡ')"><span class="eng">C</span><span class="zhuyin">ㄡ</span></button>
+            <button class="key final" onclick="press('ㄢ')"><span class="eng">V</span><span class="zhuyin">ㄢ</span></button>
+            <button class="key final" onclick="press('ㄣ')"><span class="eng">B</span><span class="zhuyin">ㄣ</span></button>
+            <button class="key final" onclick="press('ㄤ')"><span class="eng">N</span><span class="zhuyin">ㄤ</span></button>
+            <button class="key final" onclick="press('ㄥ')"><span class="eng">M</span><span class="zhuyin">ㄥ</span></button>
+            <button class="key final" onclick="press('ㄦ')"><span class="eng">,</span><span class="zhuyin">ㄦ</span></button>
+            <button class="key tone" onclick="press('ˊ')"><span class="eng">.</span><span class="zhuyin">ˊ</span></button>
+            <button class="key tone" onclick="press('ˇ')"><span class="eng">/</span><span class="zhuyin">ˇ</span></button>
         </div>
 
-        <div class="kb-row">
-            <button class="key tone" style="width: 80px;" onclick="press('˙')">˙</button>
-            <button class="key tone key-space" onclick="press(' ')">NADA 1 (SPACE)</button>
-            <button class="key key-enter" onclick="checkAnswer()">ENTER</button>
+        <div class="row" style="justify-content: center; margin-top: 10px;">
+            <button class="key tone" style="width: 60px;" onclick="press('˙')">˙</button>
+            <button class="key key-space" onclick="press(' ')">SPACE (NADA 1)</button>
+            <button class="key key-wide" style="background: #27ae60;" onclick="submit()">ENTER</button>
         </div>
     </div>
 
     <script>
-        const wordList = [
-            { h: '馬', z: 'ㄇㄚˇ' },
-            { h: '好', z: 'ㄏㄠˇ' },
-            { h: '學', z: 'ㄒㄩㄝˊ' },
-            { h: '你', z: 'ㄋㄧˇ' },
-            { h: '他', z: 'ㄊㄚ ' }
+        const words = [
+            {h:'我', z:'ㄨㄛˇ'}, {h:'你', z:'ㄋㄧˇ'}, {h:'馬', z:'ㄇㄚˇ'},
+            {h:'學', z:'ㄒㄩㄝˊ'}, {h:'好', z:'ㄏㄠˇ'}, {h:'的', z:'ㄉㄜ˙'}
         ];
-
-        let currentIndex = 0;
+        let idx = 0;
         let score = 0;
-        let userInput = "";
-        
+        let input = "";
+
         const initials = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ";
         const medials = "ㄧㄨㄩ";
         const finals = "ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ";
 
-        function showQuestion() {
-            userInput = "";
-            document.getElementById('display-input').innerText = "_";
-            document.getElementById('feedback').innerText = "";
-            document.getElementById('target-hanzi').innerText = wordList[currentIndex].h;
-            resetKeyboard();
+        function press(c) {
+            input += c;
+            document.getElementById('display').innerText = input;
+            
+            // Logika Signaling Mayer: Beritahu murid langkah selanjutnya
+            if (initials.includes(c)) highlight(['medial', 'final']);
+            else if (medials.includes(c)) highlight(['final']);
+            else if (finals.includes(c)) highlight(['tone']);
         }
 
-        function press(char) {
-            userInput += char;
-            document.getElementById('display-input').innerText = userInput;
-            updateLogic(char);
-        }
-
-        function updateLogic(char) {
-            if (initials.includes(char)) {
-                lockExcept(['medial', 'final']);
-            } else if (medials.includes(char)) {
-                lockExcept(['final']);
-            } else if (finals.includes(char)) {
-                lockExcept(['tone']);
-            }
-        }
-
-        function lockExcept(classes) {
-            document.querySelectorAll('.key:not(.key-backspace):not(.key-enter)').forEach(k => k.classList.add('disabled'));
-            classes.forEach(c => {
-                document.querySelectorAll('.' + c).forEach(k => {
+        function highlight(types) {
+            document.querySelectorAll('.key').forEach(k => {
+                if(!k.classList.contains('key-wide') && !k.classList.contains('key-space')) k.classList.add('disabled');
+            });
+            types.forEach(t => {
+                document.querySelectorAll('.'+t).forEach(k => {
                     k.classList.remove('disabled');
                     k.classList.add('highlight');
                 });
             });
         }
 
-        function handleDelete() {
-            userInput = "";
-            showQuestion();
-        }
-
-        function checkAnswer() {
-            if (userInput === wordList[currentIndex].z) {
-                document.getElementById('feedback').innerText = "BENAR! 👏";
-                score += 10;
-                document.getElementById('score').innerText = score;
-                setTimeout(() => {
-                    currentIndex = (currentIndex + 1) % wordList.length;
-                    showQuestion();
-                }, 1000);
-            } else {
-                document.getElementById('feedback').innerText = "SALAH! Coba lagi.";
-                userInput = "";
-                document.getElementById('display-input').innerText = "_";
-                resetKeyboard();
-            }
-        }
-
-        function resetKeyboard() {
+        function resetInput() {
+            input = "";
+            document.getElementById('display').innerText = "_";
+            document.getElementById('msg').innerText = "";
             document.querySelectorAll('.key').forEach(k => k.classList.remove('disabled', 'highlight'));
         }
 
-        window.onload = showQuestion;
+        function submit() {
+            if (input === words[idx].z) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                document.getElementById('msg').innerText = "Hebat! 🎉";
+                setTimeout(() => {
+                    idx = (idx + 1) % words.length;
+                    document.getElementById('target').innerText = words[idx].h;
+                    resetInput();
+                }, 1000);
+            } else {
+                document.getElementById('msg').innerText = "Salah, coba lagi!";
+                input = "";
+                document.getElementById('display').innerText = "_";
+            }
+        }
     </script>
 </body>
 </html>
