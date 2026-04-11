@@ -3,198 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zhuyin Master - Quiz Mode</title>
+    <title>Zhuyin Master - Tone Edition</title>
     <style>
         :root {
-            --bg-color: #f8f9fa;
+            --bg-color: #f4f7f6;
             --initial-color: #ffcccc;
             --medial-color: #ccffcc;
             --final-color: #ccccff;
+            --tone-color: #ffe599;
             --correct: #2ecc71;
             --wrong: #e74c3c;
         }
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .quiz-container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; width: 90%; max-width: 500px; }
+        .target-hanzi { font-size: 4.5rem; margin: 10px 0; color: #2c3e50; }
+        .display-area { font-size: 2.2rem; min-height: 50px; margin: 15px 0; color: #34495e; border-bottom: 2px solid #ddd; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
-        .quiz-container {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .target-hanzi { font-size: 5rem; margin: 0; color: #2c3e50; }
-        .target-meaning { color: #7f8c8d; margin-bottom: 10px; }
-
-        .display-area {
-            font-size: 2.5rem;
-            letter-spacing: 5px;
-            height: 60px;
-            margin: 20px 0;
-            color: #34495e;
-            border-bottom: 3px solid #eee;
-        }
-
-        .keyboard-grid {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            gap: 8px;
-            max-width: 900px;
-            background: #fff;
-            padding: 15px;
-            border-radius: 15px;
-        }
-
-        .key {
-            width: 50px; height: 50px;
-            border: none; border-radius: 8px;
-            font-size: 1.2rem; cursor: pointer;
-            transition: 0.2s; font-weight: bold;
-        }
-
+        .keyboard-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 6px; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .key { width: 45px; height: 45px; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        
         .initial { background: var(--initial-color); }
         .medial { background: var(--medial-color); }
         .final { background: var(--final-color); }
+        .tone { background: var(--tone-color); border: 2px solid #f1c40f; }
 
-        .key.disabled { opacity: 0.2; cursor: not-allowed; }
-        .key.highlight { box-shadow: 0 0 10px rgba(0,0,0,0.3); transform: scale(1.05); }
+        .key.disabled { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
+        .key.highlight { box-shadow: 0 0 12px rgba(241, 196, 15, 0.5); transform: translateY(-2px); border: 2px solid #333; }
 
-        .feedback { font-weight: bold; height: 24px; margin-top: 10px; }
-        .correct-text { color: var(--correct); }
-        .wrong-text { color: var(--wrong); }
-
-        .stats { margin-top: 20px; font-size: 1.1rem; }
+        .feedback { font-weight: bold; height: 24px; margin: 10px 0; }
+        .stats { font-size: 1rem; color: #666; }
+        .tone-container { grid-column: span 11; display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+        .btn-next { margin-top: 15px; padding: 8px 15px; background: #34495e; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="quiz-container">
-        <div class="target-meaning" id="vocab-category">Tebak Ejaan Zhuyin:</div>
-        <h1 class="target-hanzi" id="target-hanzi">馬</h1>
+        <div style="color: #95a5a6;">Eja Zhuyin + Nada:</div>
+        <h1 class="target-hanzi" id="target-hanzi">-</h1>
         <div class="display-area" id="display-input">_</div>
         <div class="feedback" id="feedback"></div>
+        <div class="stats">Skor: <span id="score">0</span> | Soal: <span id="question-num">0</span></div>
     </div>
 
     <div class="keyboard-grid" id="keyboard">
-        <button class="key initial" onclick="inputZhuyin('ㄅ')">ㄅ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄆ')">ㄆ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄇ')">ㄇ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄈ')">ㄈ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄉ')">ㄉ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄊ')">ㄊ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄋ')">ㄋ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄌ')">ㄌ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄍ')">ㄍ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄎ')">ㄎ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄏ')">ㄏ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄐ')">ㄐ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄑ')">ㄑ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄒ')">ㄒ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄓ')">ㄓ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄔ')">ㄔ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄕ')">ㄕ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄖ')">ㄖ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄗ')">ㄗ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄘ')">ㄘ</button>
-        <button class="key initial" onclick="inputZhuyin('ㄙ')">ㄙ</button>
+        <button class="key initial" onclick="press('ㄅ')">ㄅ</button>
+        <button class="key initial" onclick="press('ㄆ')">ㄆ</button>
+        <button class="key initial" onclick="press('ㄇ')">ㄇ</button>
+        <button class="key initial" onclick="press('ㄈ')">ㄈ</button>
+        <button class="key initial" onclick="press('ㄉ')">ㄉ</button>
+        <button class="key initial" onclick="press('ㄊ')">ㄊ</button>
+        <button class="key initial" onclick="press('ㄋ')">ㄋ</button>
+        <button class="key initial" onclick="press('ㄌ')">ㄌ</button>
+        <button class="key initial" onclick="press('ㄍ')">ㄍ</button>
+        <button class="key initial" onclick="press('ㄎ')">ㄎ</button>
+        <button class="key initial" onclick="press('ㄏ')">ㄏ</button>
+        <button class="key initial" onclick="press('ㄐ')">ㄐ</button>
+        <button class="key initial" onclick="press('ㄑ')">ㄑ</button>
+        <button class="key initial" onclick="press('ㄒ')">ㄒ</button>
+        <button class="key initial" onclick="press('ㄓ')">ㄓ</button>
+        <button class="key initial" onclick="press('ㄔ')">ㄔ</button>
+        <button class="key initial" onclick="press('ㄕ')">ㄕ</button>
+        <button class="key initial" onclick="press('ㄖ')">ㄖ</button>
+        <button class="key initial" onclick="press('ㄗ')">ㄗ</button>
+        <button class="key initial" onclick="press('ㄘ')">ㄘ</button>
+        <button class="key initial" onclick="press('ㄙ')">ㄙ</button>
 
-        <button class="key medial" onclick="inputZhuyin('ㄧ')">ㄧ</button>
-        <button class="key medial" onclick="inputZhuyin('ㄨ')">ㄨ</button>
-        <button class="key medial" onclick="inputZhuyin('ㄩ')">ㄩ</button>
+        <button class="key medial" onclick="press('ㄧ')">ㄧ</button>
+        <button class="key medial" onclick="press('ㄨ')">ㄨ</button>
+        <button class="key medial" onclick="press('ㄩ')">ㄩ</button>
 
-        <button class="key final" onclick="inputZhuyin('ㄚ')">ㄚ</button>
-        <button class="key final" onclick="inputZhuyin('ㄛ')">ㄛ</button>
-        <button class="key final" onclick="inputZhuyin('ㄜ')">ㄜ</button>
-        <button class="key final" onclick="inputZhuyin('ㄝ')">ㄝ</button>
-        <button class="key final" onclick="inputZhuyin('ㄞ')">ㄞ</button>
-        <button class="key final" onclick="inputZhuyin('ㄟ')">ㄟ</button>
-        <button class="key final" onclick="inputZhuyin('ㄠ')">ㄠ</button>
-        <button class="key final" onclick="inputZhuyin('ㄡ')">ㄡ</button>
-        <button class="key final" onclick="inputZhuyin('ㄢ')">ㄢ</button>
-        <button class="key final" onclick="inputZhuyin('ㄣ')">ㄣ</button>
-        <button class="key final" onclick="inputZhuyin('ㄤ')">ㄤ</button>
-        <button class="key final" onclick="inputZhuyin('ㄥ')">ㄥ</button>
-        <button class="key final" onclick="inputZhuyin('ㄦ')">ㄦ</button>
+        <button class="key final" onclick="press('ㄚ')">ㄚ</button>
+        <button class="key final" onclick="press('ㄛ')">ㄛ</button>
+        <button class="key final" onclick="press('ㄜ')">ㄜ</button>
+        <button class="key final" onclick="press('ㄝ')">ㄝ</button>
+        <button class="key final" onclick="press('ㄞ')">ㄞ</button>
+        <button class="key final" onclick="press('ㄟ')">ㄟ</button>
+        <button class="key final" onclick="press('ㄠ')">ㄠ</button>
+        <button class="key final" onclick="press('ㄡ')">ㄡ</button>
+        <button class="key final" onclick="press('ㄢ')">ㄢ</button>
+        <button class="key final" onclick="press('ㄣ')">ㄣ</button>
+        <button class="key final" onclick="press('ㄤ')">ㄤ</button>
+        <button class="key final" onclick="press('ㄥ')">ㄥ</button>
+        <button class="key final" onclick="press('ㄦ')">ㄦ</button>
+
+        <div class="tone-container">
+            <button class="key tone" onclick="press(' ')">ˉ</button> <button class="key tone" onclick="press('ˊ')">ˊ</button> <button class="key tone" onclick="press('ˇ')">ˇ</button> <button class="key tone" onclick="press('ˋ')">ˋ</button> <button class="key tone" onclick="press('˙')">˙</button> </div>
     </div>
 
-    <div class="stats">
-        Skor: <span id="score">0</span> | Soal ke: <span id="question-num">1</span>
-    </div>
-    <button onclick="nextQuestion()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Lewati / Next</button>
+    <button class="btn-next" onclick="nextQuestion()">Skip</button>
 
     <script>
-        // Data Latihan (Bisa ditambah sesuai level TOCFL)
         const wordList = [
-            { hanzi: '馬', zhuyin: 'ㄇㄚ' },
-            { hanzi: '我', zhuyin: 'ㄨㄛ' },
-            { hanzi: '爸爸', zhuyin: 'ㄅㄚㄅㄚ' }, // Game ini akan fokus per karakter dulu
-            { hanzi: '你', zhuyin: 'ㄋㄧ' },
-            { hanzi: '好', zhuyin: 'ㄏㄠ' },
-            { hanzi: '水', zhuyin: 'ㄕㄨㄟ' },
-            { hanzi: '學', zhuyin: 'ㄒㄩㄝ' }
+            { h: '馬', z: 'ㄇㄚˇ' },
+            { h: '我', z: 'ㄨㄛˇ' },
+            { h: '你', z: 'ㄋㄧˇ' },
+            { h: '他', z: 'ㄊㄚ ' }, // Spasi untuk Nada 1
+            { h: '好', z: 'ㄏㄠˇ' },
+            { h: '不', z: 'ㄅㄨˋ' },
+            { h: '學', z: 'ㄒㄩㄝˊ' },
+            { h: '的', z: 'ㄉㄜ˙' }
         ];
 
         let currentIndex = 0;
         let score = 0;
         let userInput = "";
-
+        
         const initials = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ";
         const medials = "ㄧㄨㄩ";
         const finals = "ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ";
-
-        function initGame() {
-            showQuestion();
-        }
+        const tones = " ˊˇˋ˙";
 
         function showQuestion() {
             userInput = "";
             document.getElementById('display-input').innerText = "_";
             document.getElementById('feedback').innerText = "";
-            document.getElementById('target-hanzi').innerText = wordList[currentIndex].hanzi;
+            document.getElementById('target-hanzi').innerText = wordList[currentIndex].h;
             document.getElementById('question-num').innerText = currentIndex + 1;
             resetKeyboard();
         }
 
-        function inputZhuyin(char) {
+        function press(char) {
             userInput += char;
-            document.getElementById('display-input').innerText = userInput;
-            
-            // Logika bantu: Jika sudah tekan konsonan, highlight vokal
+            document.getElementById('display-input').innerText = userInput.trim() === "" ? "_" : userInput;
+
+            // Logika Flow:
             if (initials.includes(char)) {
-                disableKeys('initial');
-                highlightKeys(['medial', 'final']);
-            } 
-            
-            checkAnswer();
+                // Sembunyikan Initial, aktifkan vokal
+                updateKeys(['medial', 'final']);
+            } else if (medials.includes(char)) {
+                // Aktifkan final
+                updateKeys(['final']);
+            } else if (finals.includes(char)) {
+                // Vokal selesai, WAJIB pilih nada
+                updateKeys(['tone']);
+            } else if (tones.includes(char)) {
+                // Nada ditekan, cek jawaban
+                checkAnswer();
+            }
+        }
+
+        function updateKeys(activeClasses) {
+            document.querySelectorAll('.key').forEach(k => k.classList.add('disabled'));
+            activeClasses.forEach(cls => {
+                document.querySelectorAll('.' + cls).forEach(k => {
+                    k.classList.remove('disabled');
+                    k.classList.add('highlight');
+                });
+            });
         }
 
         function checkAnswer() {
-            const target = wordList[currentIndex].zhuyin;
-            
+            const target = wordList[currentIndex].z;
             if (userInput === target) {
-                document.getElementById('feedback').innerHTML = "<span class='correct-text'>Hebat! Benar! ✨</span>";
+                document.getElementById('feedback').innerHTML = "<span style='color:green'>Benar! 🌟</span>";
                 score += 10;
                 document.getElementById('score').innerText = score;
-                setTimeout(nextQuestion, 1500);
-            } else if (userInput.length >= target.length) {
-                // Jika panjang input sudah sama tapi salah
-                document.getElementById('feedback').innerHTML = "<span class='wrong-text'>Coba lagi ya!</span>";
-                setTimeout(() => {
-                    userInput = "";
-                    document.getElementById('display-input').innerText = "_";
-                    resetKeyboard();
-                }, 1000);
+                setTimeout(nextQuestion, 1200);
+            } else {
+                document.getElementById('feedback').innerHTML = "<span style='color:red'>Salah, coba lagi!</span>";
+                setTimeout(showQuestion, 1000);
             }
         }
 
@@ -203,27 +172,13 @@
             showQuestion();
         }
 
-        function disableKeys(className) {
-            document.querySelectorAll('.' + className).forEach(k => k.classList.add('disabled'));
-        }
-
-        function highlightKeys(classNames) {
-            document.querySelectorAll('.key').forEach(k => k.classList.add('disabled'));
-            classNames.forEach(cls => {
-                document.querySelectorAll('.' + cls).forEach(k => {
-                    k.classList.remove('disabled');
-                    k.classList.add('highlight');
-                });
-            });
-        }
-
         function resetKeyboard() {
             document.querySelectorAll('.key').forEach(k => {
                 k.classList.remove('disabled', 'highlight');
             });
         }
 
-        window.onload = initGame;
+        window.onload = showQuestion;
     </script>
 </body>
 </html>
