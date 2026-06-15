@@ -3,216 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taiwan Standard Zhuyin Keyboard</title>
+    <title>刮刮樂拼音小測驗</title>
     <style>
         :root {
-            --chassis: #2d3436;
-            --key-bg: #ffffff;
-            --initial: #ffeaa7;
-            --medial: #55efc4;
-            --final: #81ecec;
-            --tone: #fab1a0;
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --text-color: #2c3e50;
         }
 
         body {
-            background-color: #ecf0f1;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
         }
 
-        .screen {
-            background: #fff;
-            width: 800px;
-            padding: 20px;
-            border-radius: 10px;
-            border: 8px solid var(--chassis);
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
             text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
         }
 
-        .target-hanzi { font-size: 4rem; margin: 10px 0; }
-        .input-display { font-size: 2.5rem; color: #0984e3; height: 50px; letter-spacing: 5px; border-bottom: 2px solid #ddd; display: inline-block; min-width: 150px;}
+        h1 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
 
-        .keyboard {
-            background: var(--chassis);
-            padding: 15px;
+        .game-zone {
+            position: relative;
+            width: 320px;
+            height: 180px;
+            margin: 20px auto;
             border-radius: 12px;
-            width: 850px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        /* 底層：題目中文字 */
+        .quiz-target {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff3e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 72px;
+            font-weight: bold;
+            color: #e67e22;
             user-select: none;
         }
 
-        .row { display: flex; justify-content: flex-start; margin-bottom: 6px; gap: 5px; padding-left: 10px; }
-        
-        /* Offset untuk baris agar menyerupai keyboard asli */
-        .row-2 { padding-left: 35px; }
-        .row-3 { padding-left: 50px; }
-        .row-4 { padding-left: 70px; }
-
-        .key {
-            width: 54px; height: 54px;
-            background: var(--key-bg);
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+        /* 表層：刮刮樂畫布 */
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 0 #636e72;
-            position: relative;
+            z-index: 10;
+            transition: opacity 0.5s ease;
         }
 
-        .key:active { transform: translateY(3px); box-shadow: 0 1px 0 #636e72; }
-        
-        .key .eng { font-size: 0.65rem; color: #b2bec3; position: absolute; top: 5px; left: 5px; }
-        .key .zhuyin { font-size: 1.3rem; margin-top: 5px; }
+        /* 答案選項區 */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
 
-        /* Warna kategori */
-        .initial { background: var(--initial); }
-        .medial { background: var(--medial); }
-        .final { background: var(--final); }
-        .tone { background: var(--tone); }
+        .btn-option {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-        .key-wide { width: 90px; background: #95a5a6; color: white; }
-        .key-space { width: 350px; background: white; }
-        
-        .disabled { opacity: 0.3; pointer-events: none; }
-        .highlight { outline: 3px solid #f1c40f; z-index: 10; }
+        .btn-option:hover {
+            border-color: var(--primary-color);
+            background-color: #edf2f7;
+        }
+
+        .btn-option.correct {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white;
+        }
+
+        .btn-option.wrong {
+            background-color: var(--error-color) !important;
+            border-color: var(--error-color) !important;
+            color: white;
+        }
+
+        /* 提示與下一題 */
+        #feedback {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 27px;
+        }
+
+        .btn-next {
+            margin-top: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #357abd;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="screen">
-        <div id="msg" style="color: #e74c3c; height: 20px;"></div>
-        <div class="target-hanzi" id="target">馬</div>
-        <div class="input-display" id="display">_</div>
-        <p>Skor: <span id="score">0</span></p>
+<div class="container">
+    <h1>✨ 刮刮樂拼音大挑戰 ✨</h1>
+    <p class="hint" id="game-hint">動動手指，把灰色的刮刮樂刮開吧！</p>
+    
+    <div class="game-zone">
+        <div class="quiz-target" id="word-display">學</div>
+        <canvas id="scratch-canvas" width="320" height="180"></canvas>
     </div>
 
-    <div class="keyboard">
-        <div class="row">
-            <button class="key initial" onclick="press('ㄅ')"><span class="eng">1</span><span class="zhuyin">ㄅ</span></button>
-            <button class="key initial" onclick="press('ㄆ')"><span class="eng">2</span><span class="zhuyin">ㄆ</span></button>
-            <button class="key initial" onclick="press('ㄇ')"><span class="eng">3</span><span class="zhuyin">ㄇ</span></button>
-            <button class="key initial" onclick="press('ㄈ')"><span class="eng">4</span><span class="zhuyin">ㄈ</span></button>
-            <button class="key initial" onclick="press('ㄉ')"><span class="eng">5</span><span class="zhuyin">ㄉ</span></button>
-            <button class="key initial" onclick="press('ㄊ')"><span class="eng">6</span><span class="zhuyin">ㄊ</span></button>
-            <button class="key initial" onclick="press('ㄋ')"><span class="eng">7</span><span class="zhuyin">ㄋ</span></button>
-            <button class="key initial" onclick="press('ㄌ')"><span class="eng">8</span><span class="zhuyin">ㄌ</span></button>
-            <button class="key initial" onclick="press('ㄍ')"><span class="eng">9</span><span class="zhuyin">ㄍ</span></button>
-            <button class="key initial" onclick="press('ㄎ')"><span class="eng">0</span><span class="zhuyin">ㄎ</span></button>
-            <button class="key key-wide" onclick="resetInput()">Hapus</button>
-        </div>
+    <div id="feedback"></div>
+    <div class="options-container" id="options-box"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">下一題 ➡️</button>
+</div>
 
-        <div class="row row-2">
-            <button class="key initial" onclick="press('ㄏ')"><span class="eng">Q</span><span class="zhuyin">ㄏ</span></button>
-            <button class="key initial" onclick="press('ㄐ')"><span class="eng">W</span><span class="zhuyin">ㄐ</span></button>
-            <button class="key initial" onclick="press('ㄑ')"><span class="eng">E</span><span class="zhuyin">ㄑ</span></button>
-            <button class="key initial" onclick="press('ㄒ')"><span class="eng">R</span><span class="zhuyin">ㄒ</span></button>
-            <button class="key initial" onclick="press('ㄓ')"><span class="eng">T</span><span class="zhuyin">ㄓ</span></button>
-            <button class="key initial" onclick="press('ㄔ')"><span class="eng">Y</span><span class="zhuyin">ㄔ</span></button>
-            <button class="key initial" onclick="press('ㄕ')"><span class="eng">U</span><span class="zhuyin">ㄕ</span></button>
-            <button class="key initial" onclick="press('ㄖ')"><span class="eng">I</span><span class="zhuyin">ㄖ</span></button>
-            <button class="key initial" onclick="press('ㄗ')"><span class="eng">O</span><span class="zhuyin">ㄗ</span></button>
-            <button class="key initial" onclick="press('ㄘ')"><span class="eng">P</span><span class="zhuyin">ㄘ</span></button>
-        </div>
+<script>
+    // 題庫設定：可以自行修改或擴充題目
+    const quizData = [
+        { word: "學", pinyin: "xué", options: ["xué", "xiá", "xüé", "shé"] },
+        { word: "漢", pinyin: "hàn", options: ["hān", "hán", "hǎn", "hàn"] },
+        { word: "語", pinyin: "yǔ", options: ["yū", "yú", "yǔ", "yù"] },
+        { word: "玩", pinyin: "wán", options: ["wān", "wán", "wǎn", "wàn"] },
+        { word: "樂", pinyin: "lè", options: ["yuè", "lè", "lù", "lī"] }
+    ];
 
-        <div class="row row-3">
-            <button class="key initial" onclick="press('ㄙ')"><span class="eng">A</span><span class="zhuyin">ㄙ</span></button>
-            <button class="key medial" onclick="press('ㄧ')"><span class="eng">S</span><span class="zhuyin">ㄧ</span></button>
-            <button class="key medial" onclick="press('ㄨ')"><span class="eng">D</span><span class="zhuyin">ㄨ</span></button>
-            <button class="key medial" onclick="press('ㄩ')"><span class="eng">F</span><span class="zhuyin">ㄩ</span></button>
-            <button class="key final" onclick="press('ㄚ')"><span class="eng">G</span><span class="zhuyin">ㄚ</span></button>
-            <button class="key final" onclick="press('ㄛ')"><span class="eng">H</span><span class="zhuyin">ㄛ</span></button>
-            <button class="key final" onclick="press('ㄜ')"><span class="eng">J</span><span class="zhuyin">ㄜ</span></button>
-            <button class="key final" onclick="press('ㄝ')"><span class="eng">K</span><span class="zhuyin">ㄝ</span></button>
-            <button class="key final" onclick="press('ㄞ')"><span class="eng">L</span><span class="zhuyin">ㄞ</span></button>
-            <button class="key tone" onclick="press('ˋ')"><span class="eng">;</span><span class="zhuyin">ˋ</span></button>
-        </div>
+    let currentIndex = 0;
+    let isScratchedEnough = false;
+    let hasAnswered = false;
 
-        <div class="row row-4">
-            <button class="key final" onclick="press('ㄟ')"><span class="eng">Z</span><span class="zhuyin">ㄟ</span></button>
-            <button class="key final" onclick="press('ㄠ')"><span class="eng">X</span><span class="zhuyin">ㄠ</span></button>
-            <button class="key final" onclick="press('ㄡ')"><span class="eng">C</span><span class="zhuyin">ㄡ</span></button>
-            <button class="key final" onclick="press('ㄢ')"><span class="eng">V</span><span class="zhuyin">ㄢ</span></button>
-            <button class="key final" onclick="press('ㄣ')"><span class="eng">B</span><span class="zhuyin">ㄣ</span></button>
-            <button class="key final" onclick="press('ㄤ')"><span class="eng">N</span><span class="zhuyin">ㄤ</span></button>
-            <button class="key final" onclick="press('ㄥ')"><span class="eng">M</span><span class="zhuyin">ㄥ</span></button>
-            <button class="key final" onclick="press('ㄦ')"><span class="eng">,</span><span class="zhuyin">ㄦ</span></button>
-            <button class="key tone" onclick="press('ˊ')"><span class="eng">.</span><span class="zhuyin">ˊ</span></button>
-            <button class="key tone" onclick="press('ˇ')"><span class="eng">/</span><span class="zhuyin">ˇ</span></button>
-        </div>
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
 
-        <div class="row" style="justify-content: center; margin-top: 10px;">
-            <button class="key tone" style="width: 60px;" onclick="press('˙')">˙</button>
-            <button class="key key-space" onclick="press(' ')">SPACE (NADA 1)</button>
-            <button class="key key-wide" style="background: #27ae60;" onclick="submit()">ENTER</button>
-        </div>
-    </div>
+    // 初始化題目
+    function initQuiz() {
+        isScratchedEnough = false;
+        hasAnswered = false;
+        document.getElementById('game-hint').innerText = "動動手指，把灰色的刮刮樂刮開吧！";
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('btn-next').style.display = 'none';
+        canvas.style.opacity = '1';
+        canvas.style.pointerEvents = 'auto';
 
-    <script>
-        const words = [
-            {h:'我', z:'ㄨㄛˇ'}, {h:'你', z:'ㄋㄧˇ'}, {h:'馬', z:'ㄇㄚˇ'},
-            {h:'學', z:'ㄒㄩㄝˊ'}, {h:'好', z:'ㄏㄠˇ'}, {h:'的', z:'ㄉㄜ˙'}
-        ];
-        let idx = 0;
-        let score = 0;
-        let input = "";
+        // 載入字詞
+        const currentQuiz = quizData[currentIndex];
+        document.getElementById('word-display').innerText = currentQuiz.word;
 
-        const initials = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ";
-        const medials = "ㄧㄨㄩ";
-        const finals = "ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ";
+        // 重置並繪製刮刮樂遮罩
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = '#b0bec5'; // 刮刮樂的灰色
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        function press(c) {
-            input += c;
-            document.getElementById('display').innerText = input;
-            
-            // Logika Signaling Mayer: Beritahu murid langkah selanjutnya
-            if (initials.includes(c)) highlight(['medial', 'final']);
-            else if (medials.includes(c)) highlight(['final']);
-            else if (finals.includes(c)) highlight(['tone']);
+        // 加上一些刮刮樂的點綴字
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillStyle = '#78909c';
+        ctx.textAlign = 'center';
+        ctx.fillText('刮開看題目', canvas.width / 2, canvas.height / 2 + 7);
+
+        // 產生選項
+        const optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = '';
+        currentQuiz.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-option';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt);
+            // 在刮開前先禁用選項按鈕
+            btn.disabled = true;
+            optionsBox.appendChild(btn);
+        });
+
+        setupCanvasEvents();
+    }
+
+    // 處理畫布事件（支援電腦滑鼠與手機觸控）
+    function setupCanvasEvents() {
+        function startDrawing(e) {
+            isDrawing = true;
+            scratch(e);
         }
 
-        function highlight(types) {
-            document.querySelectorAll('.key').forEach(k => {
-                if(!k.classList.contains('key-wide') && !k.classList.contains('key-space')) k.classList.add('disabled');
-            });
-            types.forEach(t => {
-                document.querySelectorAll('.'+t).forEach(k => {
-                    k.classList.remove('disabled');
-                    k.classList.add('highlight');
-                });
-            });
-        }
-
-        function resetInput() {
-            input = "";
-            document.getElementById('display').innerText = "_";
-            document.getElementById('msg').innerText = "";
-            document.querySelectorAll('.key').forEach(k => k.classList.remove('disabled', 'highlight'));
-        }
-
-        function submit() {
-            if (input === words[idx].z) {
-                score += 10;
-                document.getElementById('score').innerText = score;
-                document.getElementById('msg').innerText = "Hebat! 🎉";
-                setTimeout(() => {
-                    idx = (idx + 1) % words.length;
-                    document.getElementById('target').innerText = words[idx].h;
-                    resetInput();
-                }, 1000);
-            } else {
-                document.getElementById('msg').innerText = "Salah, coba lagi!";
-                input = "";
-                document.getElementById('display').innerText = "_";
+        function stopDrawing() {
+            isDrawing = false;
+            if (!isScratchedEnough) {
+                checkScratchPercentage();
             }
         }
-    </script>
+
+        function scratch(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const rect = canvas.getBoundingClientRect();
+            // 支援手機觸控與滑鼠
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2); // 20 是刮除的畫筆半徑
+            ctx.fill();
+        }
+
+        // 滑鼠事件
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', scratch);
+        window.addEventListener('mouseup', stopDrawing);
+
+        // 觸控事件
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', scratch);
+        window.addEventListener('touchend', stopDrawing);
+    }
+
+    // 檢查刮除面積
+    function checkScratchPercentage() {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imgData.data;
+        let clearedPixels = 0;
+
+        // 檢查透明像素的比例
+        for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] === 0) {
+                clearedPixels++;
+            }
+        }
+
+        const percentage = (clearedPixels / (canvas.width * canvas.height)) * 100;
+
+        // 如果刮開超過 35%，就判定自動完全顯現，並允許作答
+        if (percentage > 35) {
+            isScratchedEnough = true;
+            canvas.style.opacity = '0';
+            canvas.style.pointerEvents = 'none'; // 讓畫布不再阻擋點擊
+            
+            document.getElementById('game-hint').innerText = "請選擇正確的拼音！";
+            
+            // 啟用所有選項按鈕
+            const buttons = document.querySelectorAll('.btn-option');
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    }
+
+    // 檢查答案
+    function checkAnswer(selectedButton, answer) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const currentQuiz = quizData[currentIndex];
+        const feedback = document.getElementById('feedback');
+        const buttons = document.querySelectorAll('.btn-option');
+
+        // 禁用所有按鈕防止重複點擊
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (answer === currentQuiz.pinyin) {
+            selectedButton.classList.add('correct');
+            feedback.innerHTML = "<span style='color: var(--success-color);'>🎉 答對了！太棒了！</span>";
+        } else {
+            selectedButton.classList.add('wrong');
+            feedback.innerHTML = `<span style='color: var(--error-color);'>❌ 答錯了，標準答案是：${currentQuiz.pinyin}</span>`;
+            
+            // 幫學生標示出正確的那個選項
+            buttons.forEach(btn => {
+                if (btn.innerText === currentQuiz.pinyin) {
+                    btn.classList.add('correct');
+                }
+            });
+        }
+
+        // 顯示下一題按鈕
+        document.getElementById('btn-next').style.display = 'inline-block';
+    }
+
+    // 下一題
+    function nextQuestion() {
+        currentIndex = (currentIndex + 1) % quizData.length; // 循環題庫
+        initQuiz();
+    }
+
+    // 啟動遊戲
+    window.onload = initQuiz;
+</script>
+
 </body>
 </html>
